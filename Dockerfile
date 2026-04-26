@@ -7,8 +7,7 @@ FROM python:3.11-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_ROOT_USER_ACTION=ignore \
-    FLIT_ROOT_INSTALL=1 \
-    PORT=5001
+    FLIT_ROOT_INSTALL=1
 
 # Set work directory
 WORKDIR /app
@@ -23,24 +22,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mecab-ipadic \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files first (needed for flit install)
+# Copy project files
 COPY pyproject.toml README_PyPi.md ./
 COPY lute/ ./lute/
+
+# Create required directories for persistent storage
+RUN mkdir -p /app/data /app/data/backups
+
+# Copy production config
+COPY lute/config/config.yml.prod /app/lute/config/config.yml.prod
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install flit && \
     flit install --only-deps --deps production
 
-# Create required directories for Railway persistent storage
-RUN mkdir -p /app/data /app/backups
+# Expose port
+EXPOSE 5001
 
-# Expose port (Railway uses PORT env var)
-EXPOSE ${PORT:-5001}
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-5001}/')" || exit 1
-
-# Run the application
-CMD ["python", "-m", "lute.main"]
+# Run the application, using Railway's PORT env variable if available
+CMD ["sh", "-c", "python -m lute.main --port ${PORT:-5001}"]

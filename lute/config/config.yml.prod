@@ -1,12 +1,12 @@
 # Production config for Railway deployment
-# Railway provides persistent disk storage via volumes
+# Copied to config.yml if needed by lute.main
 
 ENV: prod
 DBNAME: lute.db
 
-# Railway provides persistent storage through volumes
-# Data will be stored in the mounted volume
-# DATAPATH and BACKUP_PATH will use the default locations
+# Use /app/data for persistent storage on Railway
+DATAPATH: /app/data
+BACKUP_PATH: /app/data/backups
 
-# Note: Make sure to add a Railway volume mount point for persistent data
-# The app will use platformdirs to determine the correct data directory
+# Set IS_DOCKER: true if this is run in a container.
+IS_DOCKER: true
