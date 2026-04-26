@@ -29,7 +29,7 @@ COPY lute/ ./lute/
 # Create required directories for persistent storage
 RUN mkdir -p /app/data /app/data/backups
 
-# Copy production config as config.yml (lute.main expects config.yml)
+# Copy production config as config.yml
 COPY lute/config/config.yml.prod /app/lute/config/config.yml
 
 # Copy startup script

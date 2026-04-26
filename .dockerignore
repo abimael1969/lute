@@ -1,17 +1,58 @@
-# Only include the lute/ folder.
-#
-# On mac, to find all directories and sizes:
-#   du -hd 1
-#
+# Git
 .git/
-.pytest_cache/
-.venv/
+
+# But KEEP submodules - language definitions need to be included
+!.gitmodules
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
 dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
 htmlcov/
+.tox/
+.nox/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Project specific
 tests/
 utils/
-data/
+docker/
+docs/
 
-**/__pycache__
-*.pyc
+# Data (local development)
+data/
+*.db
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (exclude most .md files)
+*.md
+!README_PyPi.md
+
+# OS
+.DS_Store
+Thumbs.db

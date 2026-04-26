@@ -6,8 +6,20 @@ echo "PORT: ${PORT:-not set}"
 echo "PWD: $(pwd)"
 echo ""
 
-echo "=== Config directory ==="
-ls -la /app/lute/config/
+echo "=== App directory ==="
+ls -la /app/
+
+echo ""
+echo "=== Lute module ==="
+ls -la /app/lute/
+
+echo ""
+echo "=== Language definitions ==="
+ls -la /app/lute/db/language_defs/ | head -20
+
+echo ""
+echo "=== Arabic definition ==="
+cat /app/lute/db/language_defs/arabic/definition.yaml 2>/dev/null || echo "Arabic definition not found!"
 
 echo ""
 echo "=== Data directory ==="
