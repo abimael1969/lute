@@ -1,12 +1,12 @@
 # Production config for Railway deployment
-# Copied to config.yml if needed by lute.main
+# Uses relative paths for container deployment
 
 ENV: prod
 DBNAME: lute.db
 
-# Use /app/data for persistent storage on Railway
+# Relative path for data storage (relative to /app/lute/config/)
 DATAPATH: /app/data
 BACKUP_PATH: /app/data/backups
 
-# Set IS_DOCKER: true if this is run in a container.
+# Docker mode
 IS_DOCKER: true

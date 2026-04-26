@@ -29,8 +29,12 @@ COPY lute/ ./lute/
 # Create required directories for persistent storage
 RUN mkdir -p /app/data /app/data/backups
 
-# Copy production config
-COPY lute/config/config.yml.prod /app/lute/config/config.yml.prod
+# Copy production config as config.yml (lute.main expects config.yml)
+COPY lute/config/config.yml.prod /app/lute/config/config.yml
+
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
@@ -40,5 +44,5 @@ RUN pip install --upgrade pip && \
 # Expose port
 EXPOSE 5001
 
-# Run the application, using Railway's PORT env variable if available
-CMD ["sh", "-c", "python -m lute.main --port ${PORT:-5001}"]
+# Run the application via startup script
+CMD ["/app/start.sh"]
