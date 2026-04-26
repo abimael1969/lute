@@ -26,8 +26,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml README_PyPi.md ./
 COPY lute/ ./lute/
 
-# Explicitly copy language definitions (submodule)
-COPY lute/db/language_defs/ /app/lute/db/language_defs/
+# Clone language definitions directly (ensure they are included)
+RUN if [ ! -f "lute/db/language_defs/arabic/definition.yaml" ]; then \
+        rm -rf lute/db/language_defs && \
+        git clone --depth 1 https://github.com/LuteOrg/lute-language-defs.git lute/db/language_defs_temp && \
+        mv lute/db/language_defs_temp lute/db/language_defs; \
+    fi
 
 # Create required directories for persistent storage
 RUN mkdir -p /app/data /app/data/backups
