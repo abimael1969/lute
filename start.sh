@@ -6,29 +6,25 @@ echo "PORT: ${PORT:-not set}"
 echo "PWD: $(pwd)"
 echo ""
 
-echo "=== App lute directory ==="
-ls -la /app/lute/
+# Create data directories FIRST (before any app initialization)
+mkdir -p /app/data /app/data/backups
+
+echo "=== Data directory ==="
+df -h /app/data 2>/dev/null || echo "df failed"
+ls -la /app/data/
 
 echo ""
-echo "=== Lute db directory ==="
-ls -la /app/lute/db/
+echo "=== Data directory disk usage ==="
+du -sh /app/data/* 2>/dev/null || echo "du failed"
 
 echo ""
 echo "=== Language definitions ==="
 if [ -d "/app/lute/db/language_defs" ]; then
-    echo "Found language_defs directory:"
-    ls /app/lute/db/language_defs/ | head -20
-    echo ""
-    echo "=== Arabic definition ==="
-    cat /app/lute/db/language_defs/arabic/definition.yaml 2>/dev/null | head -5 || echo "NOT FOUND!"
+    echo "Found language_defs:"
+    ls /app/lute/db/language_defs/ | head -10
 else
-    echo "ERROR: language_defs directory not found!"
+    echo "ERROR: language_defs not found!"
 fi
-
-echo ""
-echo "=== Data directory ==="
-mkdir -p /app/data /app/data/backups
-ls -la /app/data
 
 echo ""
 echo "=== Starting Lute on port ${PORT:-5001} ==="
