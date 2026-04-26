@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies for natto-py (MeCab)
+# Install system dependencies for natto-py (MeCab) and curl (for downloading language_defs)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
@@ -20,17 +20,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmecab-dev \
     mecab \
     mecab-ipadic \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project files
 COPY pyproject.toml README_PyPi.md ./
 COPY lute/ ./lute/
 
-# Clone language definitions directly (ensure they are included)
+# Download and extract language definitions if not present
 RUN if [ ! -f "lute/db/language_defs/arabic/definition.yaml" ]; then \
         rm -rf lute/db/language_defs && \
-        git clone --depth 1 https://github.com/LuteOrg/lute-language-defs.git lute/db/language_defs_temp && \
-        mv lute/db/language_defs_temp lute/db/language_defs; \
+        curl -sL https://github.com/LuteOrg/lute-language-defs/archive/refs/heads/master.tar.gz | \
+        tar -xz && \
+        mv lute-language-defs-master lute/db/language_defs; \
     fi
 
 # Create required directories for persistent storage
