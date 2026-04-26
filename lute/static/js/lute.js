@@ -1209,3 +1209,226 @@ function increment_status_for_selected_elements(shiftBy) {
 
   post_bulk_update(updates);
 }
+
+
+/**
+ * Mobile phrase selection mode.
+ * - Long-press enters phrase selection mode
+ * - Tapping expands/shrinks the selection
+ * - Shows action bar with Save/Copy/Translate/Cancel
+ */
+
+// Mobile phrase selection state
+let _mobile_phrase_mode = false;
+let _phrase_start_el = null;
+let _phrase_end_el = null;
+let _phrase_current_el = null;
+
+const _phrase_bar = document.getElementById('mobile-phrase-bar');
+
+function _is_mobile_device() {
+    return window.matchMedia("(max-width: 980px)").matches ||
+           window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
+function _get_textitem_index(el) {
+    return parseInt(el.attr('data-order') || el.data('order') || -1);
+}
+
+function _highlight_phrase() {
+    $('span.textitem').removeClass('phrase-selected phrase-start phrase-end phrase-current');
+    if (!_phrase_start_el || !_phrase_end_el) return;
+
+    const start_idx = _get_textitem_index(_phrase_start_el);
+    const end_idx = _get_textitem_index(_phrase_end_el);
+    const min_idx = Math.min(start_idx, end_idx);
+    const max_idx = Math.max(start_idx, end_idx);
+
+    $('span.textitem').each(function() {
+        const idx = _get_textitem_index($(this));
+        if (idx >= min_idx && idx <= max_idx) {
+            $(this).addClass('phrase-selected');
+        }
+    });
+
+    if (_phrase_current_el) {
+        $(_phrase_current_el).addClass('phrase-current');
+    }
+}
+
+function _get_phrase_text() {
+    const spans = [];
+    const start_idx = _get_textitem_index(_phrase_start_el);
+    const end_idx = _get_textitem_index(_phrase_end_el);
+    const min_idx = Math.min(start_idx, end_idx);
+    const max_idx = Math.max(start_idx, end_idx);
+
+    $('span.textitem').each(function() {
+        const idx = _get_textitem_index($(this));
+        if (idx >= min_idx && idx <= max_idx) {
+            spans.push($(this).text());
+        }
+    });
+    return spans.join('');
+}
+
+function _enter_phrase_mode(el) {
+    _mobile_phrase_mode = true;
+    _phrase_start_el = el;
+    _phrase_current_el = el;
+    _phrase_end_el = el;
+    _highlight_phrase();
+    if (_phrase_bar) {
+        _phrase_bar.classList.add('active');
+    }
+}
+
+function _exit_phrase_mode() {
+    _mobile_phrase_mode = false;
+    _phrase_start_el = null;
+    _phrase_end_el = null;
+    _phrase_current_el = null;
+    $('span.textitem').removeClass('phrase-selected phrase-start phrase-end phrase-current');
+    if (_phrase_bar) {
+        _phrase_bar.classList.remove('active');
+    }
+}
+
+// Event handlers for phrase bar buttons
+function _setup_mobile_phrase_handlers() {
+    if (!_phrase_bar) return;
+
+    // Save phrase - opens multiword term creation
+    const saveBtn = document.getElementById('phrase-save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (_phrase_start_el && _phrase_end_el) {
+                const start_idx = Math.min(_get_textitem_index(_phrase_start_el), _get_textitem_index(_phrase_end_el));
+                const end_idx = Math.max(_get_textitem_index(_phrase_start_el), _get_textitem_index(_phrase_end_el));
+                // Reuse existing multiword selection
+                selection_start_el = $('span.textitem').filter(function() {
+                    return _get_textitem_index($(this)) === start_idx;
+                });
+                const selected = [];
+                $('span.textitem').each(function() {
+                    const idx = _get_textitem_index($(this));
+                    if (idx >= start_idx && idx <= end_idx) {
+                        selected.push($(this));
+                    }
+                });
+                show_multiword_term_edit_form(selected);
+                _exit_phrase_mode();
+            }
+        });
+    }
+
+    // Copy text
+    const copyBtn = document.getElementById('phrase-copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const text = _get_phrase_text();
+            navigator.clipboard.writeText(text).then(function() {
+                _exit_phrase_mode();
+            }).catch(function() {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                _exit_phrase_mode();
+            });
+        });
+    }
+
+    // Translate (show translation)
+    const translateBtn = document.getElementById('phrase-translate-btn');
+    if (translateBtn) {
+        translateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const text = _get_phrase_text();
+            // Open the first dictionary tab with the phrase
+            const dictBtns = document.querySelectorAll('.dict-btn');
+            if (dictBtns.length > 0) {
+                dictBtns[0].click();
+            }
+            // Trigger lookup for the phrase
+            LookupButton.doLookup(text);
+            _exit_phrase_mode();
+        });
+    }
+
+    // Cancel
+    const cancelBtn = document.getElementById('phrase-cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            _exit_phrase_mode();
+        });
+    }
+}
+
+// Modified _tap_hold to enter phrase mode on mobile
+const original_tap_hold = _tap_hold;
+_tap_hold = function(el, e) {
+    if (_is_mobile_device()) {
+        // Enter phrase selection mode instead of creating term
+        _enter_phrase_mode(el);
+    } else {
+        // Desktop - use original behavior
+        if (original_tap_hold) {
+            original_tap_hold.call(this, el, e);
+        }
+    }
+};
+
+// Modified touch_ended to handle phrase selection
+const original_touch_ended = touch_ended;
+touch_ended = function(e) {
+    const el = $(this);
+    const is_textitem = el.hasClass('textitem');
+
+    // Check if in phrase mode
+    if (_mobile_phrase_mode && is_textitem) {
+        const touch_duration = Date.now() - _touch_start_time;
+        if (touch_duration < _long_touch_min_duration_ms) {
+            // Short tap while in phrase mode - update selection
+            _phrase_current_el = el;
+            // If tapping before start, expand left; if after end, expand right
+            const tap_idx = _get_textitem_index(el);
+            const start_idx = _get_textitem_index(_phrase_start_el);
+            if (tap_idx < start_idx) {
+                _phrase_start_el = el;
+            } else {
+                _phrase_end_el = el;
+            }
+            _highlight_phrase();
+        }
+        return;
+    }
+
+    // Not in phrase mode - call original handler
+    if (original_touch_ended) {
+        original_touch_ended.call(this, e);
+    }
+};
+
+// Modified _single_tap to ignore while in phrase mode
+const original_single_tap = _single_tap;
+_single_tap = function(el, e) {
+    if (_mobile_phrase_mode) {
+        // Ignore regular taps while in phrase mode
+        return;
+    }
+    if (original_single_tap) {
+        original_single_tap.call(this, el, e);
+    }
+};
+
+// Initialize mobile phrase handlers on document ready
+$(document).ready(function() {
+    _setup_mobile_phrase_handlers();
+});

@@ -2331,3 +2331,81 @@ div#termimagesearch span.imageAction:hover {
     color: #C00000;
     cursor: pointer;
 }
+
+/* === MOBILE PHRASE SELECTION BAR === */
+.mobile-phrase-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-3);
+    background: var(--color-bg-elevated);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.mobile-phrase-bar.active {
+    display: flex;
+}
+
+.phrase-bar-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-primary);
+    color: var(--color-text-inverted);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.phrase-bar-btn:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.phrase-bar-cancel {
+    background: var(--color-bg-alt);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.phrase-bar-cancel:hover {
+    background: var(--color-border);
+}
+
+/* Phrase selection highlight */
+span.textitem.phrase-selected {
+    background-color: var(--color-primary-light);
+    border-radius: 2px;
+}
+
+span.textitem.phrase-current {
+    outline: 2px solid var(--color-primary);
+}
+
+/* Mobile: show phrase bar on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .mobile-phrase-bar {
+        display: flex;
+    }
+    .mobile-phrase-bar.active {
+        display: flex;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .mobile-phrase-bar {
+        padding: var(--space-2);
+    }
+    .phrase-bar-btn {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+    }
+}
