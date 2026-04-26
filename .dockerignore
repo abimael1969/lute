@@ -1,8 +1,9 @@
 # Git
 .git/
+.gitmodules
 
-# But KEEP submodules - language definitions need to be included
-!.gitmodules
+# But KEEP language_defs submodule content
+!lute/db/language_defs/
 
 # Python
 __pycache__/

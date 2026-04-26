@@ -26,6 +26,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml README_PyPi.md ./
 COPY lute/ ./lute/
 
+# Explicitly copy language definitions (submodule)
+COPY lute/db/language_defs/ /app/lute/db/language_defs/
+
 # Create required directories for persistent storage
 RUN mkdir -p /app/data /app/data/backups
 
