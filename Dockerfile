@@ -23,16 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mecab-ipadic \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
+# Copy project files first (needed for flit install)
 COPY pyproject.toml README_PyPi.md ./
+COPY lute/ ./lute/
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install flit && \
-    flit install --deps production
-
-# Copy application code
-COPY lute/ ./lute/
+    flit install --only-deps --deps production
 
 # Create required directories for Railway persistent storage
 RUN mkdir -p /app/data /app/backups
