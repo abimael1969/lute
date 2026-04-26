@@ -1,11 +1,12 @@
-# Generic production config.
-# Copied to config.yml if needed by lute.main
+# Production config for Railway deployment
+# Railway provides persistent disk storage via volumes
 
 ENV: prod
 DBNAME: lute.db
 
-# DATAPATH is not set: user data should be
-# stored in PlatformDirs.user_data_dir
-# (ref https://pypi.org/project/platformdirs/).
+# Railway provides persistent storage through volumes
+# Data will be stored in the mounted volume
+# DATAPATH and BACKUP_PATH will use the default locations
 
-# BACKUP_PATH is not set, user should choose.
+# Note: Make sure to add a Railway volume mount point for persistent data
+# The app will use platformdirs to determine the correct data directory
