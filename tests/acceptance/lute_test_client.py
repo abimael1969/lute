@@ -488,6 +488,57 @@ class LuteTestClient:  # pylint: disable=too-many-public-methods
         )
         mouse.up()
 
+    def mobile_phrase_drag(self, fromword, toword):
+        "Long-press and drag between words using synthetic touch events."
+        from_el = self._get_element_for_word(fromword)
+        to_el = self._get_element_for_word(toword)
+        from_box = from_el.bounding_box()
+        to_box = to_el.bounding_box()
+        assert from_box and to_box, "Element bounding boxes must exist"
+
+        coords = {
+            "startX": from_box["x"] + from_box["width"] / 2,
+            "startY": from_box["y"] + from_box["height"] / 2,
+            "endX": to_box["x"] + to_box["width"] / 2,
+            "endY": to_box["y"] + to_box["height"] / 2,
+        }
+        from_el.evaluate(
+            """
+            async (el, coords) => {
+              const touch = (target, x, y) => new Touch({
+                identifier: 1,
+                target,
+                clientX: x,
+                clientY: y,
+                screenX: x,
+                screenY: y,
+                pageX: x + window.scrollX,
+                pageY: y + window.scrollY
+              });
+              const fire = (type, x, y, active) => {
+                const t = touch(el, x, y);
+                el.dispatchEvent(new TouchEvent(type, {
+                  bubbles: true,
+                  cancelable: true,
+                  touches: active ? [t] : [],
+                  targetTouches: active ? [t] : [],
+                  changedTouches: [t]
+                }));
+              };
+              fire('touchstart', coords.startX, coords.startY, true);
+              await new Promise(resolve => setTimeout(resolve, 650));
+              fire('touchmove', coords.endX, coords.endY, true);
+              await new Promise(resolve => setTimeout(resolve, 50));
+              fire('touchend', coords.endX, coords.endY, false);
+            }
+            """,
+            coords,
+        )
+
+    def mobile_phrase_save(self):
+        "Tap the mobile phrase Save button."
+        self.page.locator("#mobile-phrase-bar.active #phrase-save-btn").tap()
+
     def _refresh_browser(self):
         """
         Term actions (edits, hotkeys) cause updated content to be ajaxed in.

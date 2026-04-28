@@ -511,6 +511,18 @@ def drag(luteclient, wstart, wend):
     luteclient.drag(wstart, wend)
 
 
+@when(parsers.parse('I mobile phrase-drag from "{wstart}" to "{wend}"'))
+def mobile_phrase_drag(luteclient, wstart, wend):
+    "Long-press and drag to select a phrase on mobile."
+    luteclient.mobile_phrase_drag(wstart, wend)
+
+
+@when("I save the mobile phrase")
+def mobile_phrase_save(luteclient):
+    "Tap Save in the mobile phrase action bar."
+    luteclient.mobile_phrase_save()
+
+
 @when(parsers.parse('I click "{word}" and press hotkey "{hotkey}"'))
 def when_click_word_press_hotkey(luteclient, word, hotkey):
     "Click word and press hotkey."

@@ -364,8 +364,4 @@ function loadDictionaries() {
   dictContainer.style.display = "flex";
   dictContainer.style.flexDirection = "column";
   LookupButton.all.forEach(button => button.contentLoaded = false);
-  const active_button = LookupButton.all.find(button => button.is_active);
-  if (active_button) {
-    active_button.do_lookup();
-  }
 }

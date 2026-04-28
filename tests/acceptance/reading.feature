@@ -30,6 +30,14 @@ Feature: User can actually read and stuff.
             Hola (2)/. /Adios/ /amigo/.
 
 
+    @mobile
+    Scenario: Mobile long-press drag selects and saves a phrase
+        Given a Spanish book "Hola" with content:
+            Tengo un amigo.
+        When I mobile phrase-drag from "Tengo" to "amigo"
+        Then the reading page term form shows term "Tengo un amigo"
+
+
     Scenario: Reading a Japanese book
         Given a Japanese book "Genki" with content:
             私は元気です.
