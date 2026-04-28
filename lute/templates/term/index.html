@@ -100,6 +100,8 @@
       <th style="text-align: left">Term</th>
       <th style="text-align: left">Parents</th>
       <th style="text-align: left">Translation</th>
+      <th style="text-align: left">Article</th>
+      <th style="text-align: left">Sentence</th>
       <th style="text-align: left">Tags</th>
       <th style="text-align: left">Status</th>
       <th style="text-align: left">Language</th>
@@ -344,6 +346,8 @@
         { name: "WoText", render: render_text },
         { name: "ParentText", data: "ParentText", createdCell: editableParentsCell },
         { name: "WoTranslation", width: "40%", searchable: true, data: "WoTranslation", createdCell: editableTranslationCell },
+        { name: "TrBookTitle", data: "TrBookTitle", render: render_reference_article },
+        { name: "TrSentenceHTML", data: "TrSentenceHTML", render: render_reference_sentence },
         { name: "TagList", data: "TagList", createdCell: editableTagsCell },
         { name: "StID", data: "StID", createdCell: editableStatusCell },
         { name: "LgName", data: "LgName" },
@@ -391,6 +395,18 @@
     const dt = row["WoCreated"];
     const datepart = dt.split(' ')[0];
     return `<span title="${dt}">${datepart}</span>`;
+  };
+
+  let escape_html = function (text) {
+    return $('<div>').text(text ?? "").html();
+  };
+
+  let render_reference_article = function (data, type, row, meta) {
+    return escape_html(row["TrBookTitle"]);
+  };
+
+  let render_reference_sentence = function (data, type, row, meta) {
+    return row["TrSentenceHTML"] ?? "";
   };
 
 

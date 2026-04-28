@@ -36,6 +36,29 @@ class TermFlashMessage(db.Model):
     term = db.relationship("Term", back_populates="term_flash_message", uselist=False)
 
 
+class TermReference(db.Model):
+    "Snapshot of where a term was saved from in the reading pane."
+
+    __tablename__ = "termreferences"
+
+    id = db.Column("TrID", db.Integer, primary_key=True)
+    term_id = db.Column(
+        "TrWoID", db.Integer, db.ForeignKey("words.WoID"), nullable=False
+    )
+    book_id = db.Column("TrBookID", db.Integer, nullable=True)
+    text_id = db.Column("TrTextID", db.Integer, nullable=True)
+    page_number = db.Column("TrPageNumber", db.Integer, nullable=True)
+    book_title = db.Column("TrBookTitle", db.String(200), nullable=False)
+    sentence_html = db.Column("TrSentenceHTML", db.Text, nullable=False)
+    created = db.Column(
+        "TrCreated",
+        db.DateTime,
+        nullable=False,
+        server_default=db.func.current_timestamp(),
+    )
+    term = db.relationship("Term", back_populates="references")
+
+
 wordtags = db.Table(
     "wordtags",
     db.Model.metadata,
@@ -131,6 +154,11 @@ class Term(
     term_flash_message = db.relationship(
         "TermFlashMessage",
         uselist=False,
+        back_populates="term",
+        cascade="all, delete-orphan",
+    )
+    references = db.relationship(
+        "TermReference",
         back_populates="term",
         cascade="all, delete-orphan",
     )

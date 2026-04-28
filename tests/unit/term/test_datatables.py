@@ -5,6 +5,7 @@ Book tests.
 import pytest
 from lute.term.datatables import get_data_tables_list
 from lute.db import db
+from lute.models.term import TermReference
 from tests.utils import add_terms
 
 
@@ -75,3 +76,34 @@ def test_parents_included_in_termids_query(app_context, _dt_params, spanish):
     terms = [t["WoText"] for t in d["data"]]
     terms = sorted(terms)
     assert terms == ["P", "T"]
+
+
+def test_latest_reference_included(app_context, _dt_params, spanish):
+    "Term listing returns the most recently saved reader reference."
+    # pylint: disable=unbalanced-tuple-unpacking
+    [_term_without_ref, term_with_ref] = add_terms(spanish, ["sin ref", "una ciudad"])
+    db.session.add(
+        TermReference(
+            term_id=term_with_ref.id,
+            book_title="Older",
+            sentence_html="Older <b>una ciudad</b>.",
+        )
+    )
+    db.session.add(
+        TermReference(
+            term_id=term_with_ref.id,
+            book_title="Aladino y la lámpara maravillosa",
+            sentence_html="Lejos muy lejos, en <b>una ciudad</b> de China.",
+        )
+    )
+    db.session.commit()
+
+    d = get_data_tables_list(_dt_params, db.session)
+    rows = {row["WoText"]: row for row in d["data"]}
+    assert rows["sin ref"]["TrBookTitle"] is None
+    assert rows["sin ref"]["TrSentenceHTML"] is None
+    assert rows["una ciudad"]["TrBookTitle"] == "Aladino y la lámpara maravillosa"
+    assert (
+        rows["una ciudad"]["TrSentenceHTML"]
+        == "Lejos muy lejos, en <b>una ciudad</b> de China."
+    )

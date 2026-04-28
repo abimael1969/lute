@@ -5,6 +5,7 @@
 import os
 import csv
 import json
+import html
 from flask import (
     Blueprint,
     request,
@@ -16,7 +17,8 @@ from flask import (
     flash,
 )
 from lute.models.language import Language
-from lute.models.term import Status
+from lute.models.book import Text
+from lute.models.term import Status, TermReference
 from lute.models.repositories import (
     LanguageRepository,
     TermRepository,
@@ -35,6 +37,51 @@ from lute.term.forms import TermForm
 import lute.utils.formutils
 
 bp = Blueprint("term", __name__, url_prefix="/term")
+
+
+def _sanitize_reference_sentence_html(sentence_html):
+    "Escape all HTML except Lute-generated bold markers."
+    if (sentence_html or "").strip() == "":
+        return ""
+    escaped = html.escape(sentence_html.strip())
+    return escaped.replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
+
+
+def _make_reference_from_request(term_id):
+    "Build a TermReference from hidden reader-origin form fields, if present."
+    sentence_html = _sanitize_reference_sentence_html(
+        request.form.get("lute_ref_sentence_html", "")
+    )
+    book_title = (request.form.get("lute_ref_book_title", "") or "").strip()
+    if sentence_html == "" or book_title == "":
+        return None
+
+    def _int_or_none(value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    book_id = _int_or_none(request.form.get("lute_ref_book_id"))
+    page_number = _int_or_none(request.form.get("lute_ref_page_number"))
+    text_id = None
+    if book_id is not None and page_number is not None:
+        text = (
+            db.session.query(Text)
+            .filter(Text.bk_id == book_id, Text.order == page_number)
+            .first()
+        )
+        if text is not None:
+            text_id = text.id
+
+    return TermReference(
+        term_id=term_id,
+        book_id=book_id,
+        text_id=text_id,
+        page_number=page_number,
+        book_title=book_title,
+        sentence_html=sentence_html,
+    )
 
 
 @bp.route("/index", defaults={"search": None}, methods=["GET"])
@@ -242,7 +289,11 @@ def handle_term_form(
 
     if form.validate_on_submit():
         form.populate_obj(term)
-        repo.add(term)
+        dbterm = repo.add(term)
+        session.flush()
+        term_reference = _make_reference_from_request(dbterm.id)
+        if term_reference is not None:
+            session.add(term_reference)
         repo.commit()
         return return_on_success
 

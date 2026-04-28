@@ -12,6 +12,8 @@ def get_data_tables_list(parameters, session):
     w.WoID as WoID, LgName, L.LgID as LgID, w.WoText as WoText, parents.parentlist as ParentText, w.WoTranslation,
     w.WoRomanization,
     WiSource,
+    tr.TrBookTitle,
+    tr.TrSentenceHTML,
     ifnull(tags.taglist, '') as TagList,
     StText,
     StID,
@@ -47,6 +49,13 @@ def get_data_tables_list(parameters, session):
       GROUP BY WtWoID
     ) AS tags on tags.WoID = w.WoID
     LEFT OUTER JOIN wordimages wi on wi.WiWoID = w.WoID
+    LEFT OUTER JOIN termreferences tr on tr.TrID = (
+      SELECT TrID
+      FROM termreferences trlatest
+      WHERE trlatest.TrWoID = w.WoID
+      ORDER BY TrCreated DESC, TrID DESC
+      LIMIT 1
+    )
     """
 
     typecrit = supported_parser_type_criteria()

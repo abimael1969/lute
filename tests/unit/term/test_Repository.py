@@ -7,7 +7,7 @@ and retrieved from DB.
 
 import pytest
 
-from lute.models.term import Term as DBTerm, TermTag
+from lute.models.term import Term as DBTerm, TermReference, TermTag
 from lute.db import db
 from lute.term.model import Term, Repository
 from tests.dbasserts import assert_sql_result, assert_record_count_equals
@@ -49,6 +49,35 @@ def test_save_new(app_context, hello_term, repo):
 
     term = repo.find(hello_term.language_id, hello_term.text)
     assert term.text == hello_term.text
+
+
+def test_term_form_saves_reader_reference(client, app_context, spanish):
+    "Term form saves sanitized reader-origin reference snapshot."
+    response = client.post(
+        "/term/new",
+        data={
+            "language_id": spanish.id,
+            "original_text": "",
+            "text": "una ciudad",
+            "parentslist": "[]",
+            "translation": "",
+            "romanization": "",
+            "status": "1",
+            "termtagslist": "[]",
+            "current_image": "",
+            "lute_ref_book_id": "42",
+            "lute_ref_page_number": "3",
+            "lute_ref_book_title": "Aladino y la lámpara maravillosa",
+            "lute_ref_sentence_html": 'Lejos <script>x</script> <b>una ciudad</b>.',
+        },
+    )
+
+    assert response.status_code == 302
+    ref = db.session.query(TermReference).one()
+    assert ref.book_id == 42
+    assert ref.page_number == 3
+    assert ref.book_title == "Aladino y la lámpara maravillosa"
+    assert ref.sentence_html == "Lejos &lt;script&gt;x&lt;/script&gt; <b>una ciudad</b>."
 
 
 def test_save_new_multiword(app_context, hello_term, repo):

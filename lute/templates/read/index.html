@@ -250,6 +250,7 @@
   let _lute_form_event_handler = function(event) {
     if (event.data.event === "LuteTermFormOpened") {
       LookupButton.TERM_FORM_CONTAINER = wordFrame.contentDocument.getElementById("term-form-container");
+      inject_pending_term_reference_into_form(wordFrame.contentDocument);
       loadDictionaries();
     }
 

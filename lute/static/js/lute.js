@@ -191,12 +191,96 @@ let tooltip_textitem_hover_content = function (el, setContent) {
 /* ========================================= */
 /** Showing the edit form. */
 
+let LUTE_PENDING_TERM_REFERENCE = null;
+
+function _escape_reference_html(text) {
+  return (text ?? '').replace(/[&<>"']/g, function(ch) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch];
+  });
+}
+
+function _current_book_title() {
+  return ($('#thetexttitle').text() || $('#headertexttitle').text() || '').trim();
+}
+
+function _build_sentence_reference_html(selected) {
+  const selected_orders = new Set(
+    selected.toArray().map(el => _get_order($(el)))
+  );
+  const selected_sentence_ids = new Set(
+    selected.toArray().map(el => $(el).data('sentence-id'))
+  );
+  const context_spans = $('span.textitem').filter(function() {
+    return selected_sentence_ids.has($(this).data('sentence-id'));
+  }).toArray().sort((a, b) => _get_order($(a)) - _get_order($(b)));
+
+  return context_spans.map(function(el) {
+    const span = $(el);
+    const text = _escape_reference_html(span.text());
+    if (selected_orders.has(_get_order(span)))
+      return `<b>${text}</b>`;
+    return text;
+  }).join('').replace(/\u200B/g, '').replace(/¶/g, '').trim();
+}
+
+function _set_pending_term_reference(selected) {
+  if (selected == null || selected.length == 0) {
+    LUTE_PENDING_TERM_REFERENCE = null;
+    return;
+  }
+
+  const sentence_html = _build_sentence_reference_html(selected);
+  if (sentence_html == '') {
+    LUTE_PENDING_TERM_REFERENCE = null;
+    return;
+  }
+
+  LUTE_PENDING_TERM_REFERENCE = {
+    book_id: $('#book_id').val(),
+    page_number: $('#page_num').val(),
+    book_title: _current_book_title(),
+    sentence_html: sentence_html
+  };
+}
+
+function inject_pending_term_reference_into_form(frame_document) {
+  if (LUTE_PENDING_TERM_REFERENCE == null)
+    return;
+
+  const form = frame_document.getElementById('term-form');
+  if (form == null)
+    return;
+
+  const set_hidden = function(name, value) {
+    let input = form.querySelector(`input[name="${name}"]`);
+    if (input == null) {
+      input = frame_document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      form.appendChild(input);
+    }
+    input.value = value ?? '';
+  };
+
+  set_hidden('lute_ref_book_id', LUTE_PENDING_TERM_REFERENCE.book_id);
+  set_hidden('lute_ref_page_number', LUTE_PENDING_TERM_REFERENCE.page_number);
+  set_hidden('lute_ref_book_title', LUTE_PENDING_TERM_REFERENCE.book_title);
+  set_hidden('lute_ref_sentence_html', LUTE_PENDING_TERM_REFERENCE.sentence_html);
+}
+
 function _show_wordframe_url(url) {
   top.frames.wordframe.location.href = url;
   applyInitialPaneSizes();  // in resize.js
 }
 
 function show_term_edit_form(el) {
+  _set_pending_term_reference(el);
   const wid = parseInt(el.data('wid'));
   _show_wordframe_url(`/read/edit_term/${wid}`);
 }
@@ -226,6 +310,7 @@ function _hide_dictionaries() {
 
 /* Hide word editing form. */
 function _hide_term_edit_form() {
+  LUTE_PENDING_TERM_REFERENCE = null;
   $('#wordframeid').attr('src', '/read/empty');
   // NOTE: checking for specific URLs or fragments in the location.href
   // causes security errors in some cases.
@@ -245,6 +330,7 @@ function show_multiword_term_edit_form(selected) {
   const text = textparts.join('').trim();
   if (text == "")
     return;
+  _set_pending_term_reference(selected);
   const lid = parseInt(selected.eq(0).data('lang-id'));
   // "/" in the term cause problems with routing, so hack a fix.
   const sendtext = text.replace(/\//g, "LUTESLASH");
