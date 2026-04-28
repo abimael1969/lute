@@ -6,6 +6,7 @@ import os
 import csv
 import json
 import html
+import re
 from flask import (
     Blueprint,
     request,
@@ -43,8 +44,17 @@ def _sanitize_reference_sentence_html(sentence_html):
     "Escape all HTML except Lute-generated bold markers."
     if (sentence_html or "").strip() == "":
         return ""
-    escaped = html.escape(sentence_html.strip())
-    return escaped.replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
+
+    parts = re.split(r"(<\/?b>)", sentence_html.strip())
+    safe_parts = []
+    for part in parts:
+        if part in ("<b>", "</b>"):
+            safe_parts.append(part)
+            continue
+        normalized = html.unescape(part)
+        escaped = html.escape(normalized).replace("&#x27;", "&#39;")
+        safe_parts.append(escaped)
+    return "".join(safe_parts)
 
 
 def _make_reference_from_request(term_id):

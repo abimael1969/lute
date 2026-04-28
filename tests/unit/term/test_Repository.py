@@ -10,6 +10,7 @@ import pytest
 from lute.models.term import Term as DBTerm, TermReference, TermTag
 from lute.db import db
 from lute.term.model import Term, Repository
+from lute.term.routes import _sanitize_reference_sentence_html
 from tests.dbasserts import assert_sql_result, assert_record_count_equals
 from tests.utils import add_terms
 
@@ -68,7 +69,7 @@ def test_term_form_saves_reader_reference(client, app_context, spanish):
             "lute_ref_book_id": "42",
             "lute_ref_page_number": "3",
             "lute_ref_book_title": "Aladino y la lámpara maravillosa",
-            "lute_ref_sentence_html": 'Lejos <script>x</script> <b>una ciudad</b>.',
+            "lute_ref_sentence_html": "Lejos <script>x</script> <b>una ciudad</b>.",
         },
     )
 
@@ -77,7 +78,36 @@ def test_term_form_saves_reader_reference(client, app_context, spanish):
     assert ref.book_id == 42
     assert ref.page_number == 3
     assert ref.book_title == "Aladino y la lámpara maravillosa"
-    assert ref.sentence_html == "Lejos &lt;script&gt;x&lt;/script&gt; <b>una ciudad</b>."
+    assert (
+        ref.sentence_html == "Lejos &lt;script&gt;x&lt;/script&gt; <b>una ciudad</b>."
+    )
+
+
+def test_reference_sentence_sanitizer_keeps_special_chars_displayable():
+    "JS-escaped English punctuation is not double-escaped."
+    raw = (
+        "But don&#39;t delete &quot;unknown&quot; at AT&amp;T or "
+        "&lt;tag&gt; while going <b>through</b>."
+    )
+
+    actual = _sanitize_reference_sentence_html(raw)
+
+    assert actual == (
+        "But don&#39;t delete &quot;unknown&quot; at AT&amp;T or "
+        "&lt;tag&gt; while going <b>through</b>."
+    )
+
+
+def test_reference_sentence_sanitizer_only_allows_real_bold_markers():
+    "Only Lute's raw bold markers are preserved as HTML."
+    raw = "&lt;b&gt;not bold&lt;/b&gt; <b>real</b> <script>x</script>"
+
+    actual = _sanitize_reference_sentence_html(raw)
+
+    assert (
+        actual
+        == "&lt;b&gt;not bold&lt;/b&gt; <b>real</b> &lt;script&gt;x&lt;/script&gt;"
+    )
 
 
 def test_save_new_multiword(app_context, hello_term, repo):

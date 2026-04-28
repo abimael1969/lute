@@ -93,7 +93,10 @@ def test_latest_reference_included(app_context, _dt_params, spanish):
         TermReference(
             term_id=term_with_ref.id,
             book_title="Aladino y la lámpara maravillosa",
-            sentence_html="Lejos muy lejos, en <b>una ciudad</b> de China.",
+            sentence_html=(
+                "But don&#39;t delete &quot;unknown&quot; at AT&amp;T "
+                "while going <b>through</b>."
+            ),
         )
     )
     db.session.commit()
@@ -105,5 +108,5 @@ def test_latest_reference_included(app_context, _dt_params, spanish):
     assert rows["una ciudad"]["TrBookTitle"] == "Aladino y la lámpara maravillosa"
     assert (
         rows["una ciudad"]["TrSentenceHTML"]
-        == "Lejos muy lejos, en <b>una ciudad</b> de China."
+        == "But don&#39;t delete &quot;unknown&quot; at AT&amp;T while going <b>through</b>."
     )
