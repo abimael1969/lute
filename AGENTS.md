@@ -46,3 +46,8 @@ Important: most Invoke test tasks first verify that the configured DB name start
 - Do not revert user changes unless explicitly asked.
 - Keep edits scoped to the requested behavior.
 - Avoid unrelated formatting churn, especially in large CSS/JS files.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
