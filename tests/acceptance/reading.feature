@@ -31,11 +31,34 @@ Feature: User can actually read and stuff.
 
 
     @mobile
+    Scenario: Mobile term form does not show dictionaries
+        Given a Spanish book "Hola" with content:
+            Hola. Adios amigo.
+        When I click "Hola"
+        Then the reading page term form shows term "Hola"
+        And the mobile dictionary panel is hidden
+
+
+    @mobile
+    Scenario: Mobile term form stays usable from the last visible line
+        Given a Spanish book "Hola" with content:
+            uno dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis diecisiete dieciocho diecinueve veinte.
+            veintiuno veintidos veintitres veinticuatro veinticinco veintiseis veintisiete veintiocho veintinueve treinta treintayuno treintaydos.
+            treintaytres treintaycuatro treintaycinco treintayseis treintaysiete treintayocho treintaynueve cuarenta cuarentayuno cuarentaydos.
+            cuarentaytres cuarentaycuatro cuarentaycinco cuarentayseis cuarentaysiete cuarentayocho cuarentaynueve cincuenta ultimopalabra.
+        When I click "ultimopalabra" near the viewport bottom
+        Then the reading page term form shows term "ultimopalabra"
+        And the mobile term form panel is usable
+        And the mobile dictionary panel is hidden
+
+
+    @mobile
     Scenario: Mobile long-press drag selects and saves a phrase
         Given a Spanish book "Hola" with content:
             Tengo un amigo.
         When I mobile phrase-drag from "Tengo" to "amigo"
         Then the reading page term form shows term "Tengo un amigo"
+        And the mobile dictionary panel is hidden
 
 
     Scenario: Reading a Japanese book

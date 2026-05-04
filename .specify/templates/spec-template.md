@@ -18,6 +18,11 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+
+  For Lute v3, explicitly call out whether each story affects desktop reader
+  behavior, mobile reader behavior, domain/rendering semantics, or data safety.
+  Acceptance scenarios should describe observable user behavior, not only
+  internal implementation outcomes.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -70,6 +75,8 @@
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
   Fill them out with the right edge cases.
+  For reader changes, include relevant desktop/mobile selection, scrolling,
+  long-press, paging, popup, or token-boundary edge cases.
 -->
 
 - What happens when [boundary condition]?

@@ -8,7 +8,10 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Tests are required when the feature touches Lute backend/rendering,
+reader UI, mobile reader behavior, data safety, or domain semantics. Include the
+focused verification command from the implementation plan, or document why
+existing coverage is sufficient.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -20,10 +23,14 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Flask app code**: `lute/`
+- **Reader templates**: `lute/templates/read/`
+- **Reader JavaScript**: `lute/static/js/lute.js`
+- **Main stylesheet**: `lute/static/css/styles.css`
+- **Read/render domain logic**: `lute/read/` and `lute/read/render/`
+- **Tests**: `tests/`, with browser flows in `tests/acceptance/` and
+  `tests/playwright/`
+- Paths in generated tasks MUST use these real Lute locations from `plan.md`.
 
 <!-- 
   ============================================================================
@@ -79,19 +86,20 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (required for Lute risk surfaces) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **NOTE: For Lute risk surfaces, include tests or explicit coverage rationale
+> before implementation. Prefer focused pytest/Invoke commands over broad suites.**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Focused unit/rendering test in tests/unit/test_[name].py
+- [ ] T011 [P] [US1] Acceptance scenario for [user journey] in tests/acceptance/[feature].feature
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T012 [P] [US1] Update [Entity1] model behavior in lute/models/[entity1].py
+- [ ] T013 [P] [US1] Update [Entity2] model behavior in lute/models/[entity2].py
+- [ ] T014 [US1] Implement read/render behavior in lute/read/[module].py (depends on T012, T013)
+- [ ] T015 [US1] Implement reader UI behavior in lute/templates/read/[template].html or lute/static/js/lute.js
 - [ ] T016 [US1] Add validation and error handling
 - [ ] T017 [US1] Add logging for user story 1 operations
 
@@ -105,16 +113,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2 (required for Lute risk surfaces) ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T018 [P] [US2] Focused unit/rendering test in tests/unit/test_[name].py
+- [ ] T019 [P] [US2] Acceptance scenario for [user journey] in tests/acceptance/[feature].feature
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T020 [P] [US2] Update [Entity] model behavior in lute/models/[entity].py
+- [ ] T021 [US2] Implement read/render behavior in lute/read/[module].py
+- [ ] T022 [US2] Implement reader UI behavior in lute/templates/read/[template].html or lute/static/js/lute.js
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
@@ -127,16 +135,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 (required for Lute risk surfaces) ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T024 [P] [US3] Focused unit/rendering test in tests/unit/test_[name].py
+- [ ] T025 [P] [US3] Acceptance scenario for [user journey] in tests/acceptance/[feature].feature
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T026 [P] [US3] Update [Entity] model behavior in lute/models/[entity].py
+- [ ] T027 [US3] Implement read/render behavior in lute/read/[module].py
+- [ ] T028 [US3] Implement reader UI behavior in lute/templates/read/[template].html or lute/static/js/lute.js
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -153,7 +161,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional unit tests or acceptance coverage required by the Lute constitution
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
 
@@ -178,7 +186,7 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Within Each User Story
 
-- Tests (if included) MUST be written and FAIL before implementation
+- Required tests or coverage rationale MUST be defined before implementation
 - Models before services
 - Services before endpoints
 - Core implementation before integration
@@ -198,13 +206,13 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
+# Launch all tests for User Story 1 together when required by the plan:
+Task: "Focused unit/rendering test in tests/unit/test_[name].py"
+Task: "Acceptance scenario for [user journey] in tests/acceptance/[feature].feature"
 
-# Launch all models for User Story 1 together:
-Task: "Create [Entity1] model in src/models/[entity1].py"
-Task: "Create [Entity2] model in src/models/[entity2].py"
+# Launch independent domain updates for User Story 1 together:
+Task: "Update [Entity1] model behavior in lute/models/[entity1].py"
+Task: "Update [Entity2] model behavior in lute/models/[entity2].py"
 ```
 
 ---

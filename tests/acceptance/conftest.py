@@ -466,6 +466,12 @@ def when_click_word(luteclient, word):
     luteclient.click_word(word)
 
 
+@when(parsers.parse('I click "{word}" near the viewport bottom'))
+def when_click_word_near_viewport_bottom(luteclient, word):
+    "Scroll a word to the last visible line, then click it."
+    luteclient.click_word_near_viewport_bottom(word)
+
+
 @then(parsers.parse('the reading page term form shows term "{text}"'))
 def then_reading_page_term_form_iframe_shows_term(luteclient, text):
     "Have to get and read the iframe content, it's not in the main browser page."
@@ -475,6 +481,19 @@ def then_reading_page_term_form_iframe_shows_term(luteclient, text):
     zws = "\u200B"
     val = term_field.input_value().replace(zws, "")
     assert val == text, "check field value"
+
+
+@then("the mobile dictionary panel is hidden")
+def then_mobile_dictionary_panel_is_hidden(luteclient):
+    "Mobile term editing should not show the dictionary tabs/panel."
+    assert not luteclient.page.locator(".dictcontainer").is_visible()
+    assert not luteclient.page.locator("#dicttabs").is_visible()
+
+
+@then("the mobile term form panel is usable")
+def then_mobile_term_form_panel_is_usable(luteclient):
+    "The mobile bottom sheet should leave enough form visible for editing."
+    luteclient.assert_mobile_term_form_panel_is_usable()
 
 
 @then("the bulk edit term form is shown")

@@ -31,7 +31,25 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Answer each Lute v3 constitution gate before design work begins, then re-check
+after Phase 1 design:
+
+- **Reader experience**: Does this affect reading, token selection, term popups,
+  term editing, navigation, audio controls, paging, or text rendering? If yes,
+  describe how desktop behavior remains stable.
+- **Domain semantics**: Does this affect texts, languages, terms, term statuses,
+  word identifiers, token ordering, parser output, or rendered `span.textitem`
+  data attributes? If yes, describe the compatibility expectation.
+- **Testing**: List the focused verification command(s), choosing from pytest,
+  `inv test`, `inv accept`, `inv acceptmobile`, `inv playwright`, or a documented
+  reason a required command cannot be run.
+- **Mobile impact**: Does this affect selection, scrolling, long-press behavior,
+  or touch flows? If yes, include mobile acceptance coverage.
+- **Architecture fit**: Confirm the plan uses existing Flask templates, Python
+  helpers, jQuery-style JavaScript, and local CSS/JS patterns unless explicitly
+  justified.
+- **Data safety**: Confirm no user-local data/config is mutated unexpectedly and
+  DB-resetting tasks only run against databases whose names start with `test_`.
 
 ## Project Structure
 
@@ -49,46 +67,24 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 <!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
+  ACTION REQUIRED: Keep the tree focused on real Lute paths affected by this
+  feature. Delete unaffected paths and add specific modules/templates/tests as
+  needed. Do not introduce a new frontend/backend project split unless the
+  feature explicitly requires and justifies it.
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+lute/
+├── read/
+├── read/render/
+├── templates/read/
+├── static/js/lute.js
+└── static/css/styles.css
 
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+├── unit/
+├── acceptance/
+└── playwright/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real

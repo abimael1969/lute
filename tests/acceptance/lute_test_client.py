@@ -539,6 +539,37 @@ class LuteTestClient:  # pylint: disable=too-many-public-methods
         "Tap the mobile phrase Save button."
         self.page.locator("#mobile-phrase-bar.active #phrase-save-btn").tap()
 
+    def click_word_near_viewport_bottom(self, word):
+        "Place a word near the bottom of the viewport, then tap/click it."
+        el = self._get_element_for_word(word)
+        el.evaluate(
+            """
+            (element) => {
+              element.scrollIntoView({ block: 'end', inline: 'nearest' });
+              const rect = element.getBoundingClientRect();
+              const desiredTop = window.innerHeight - rect.height - 8;
+              window.scrollBy(0, rect.top - desiredTop);
+            }
+            """
+        )
+        self.page.wait_for_timeout(100)
+        if self.has_touch:
+            el.tap()
+        else:
+            el.click()
+
+    def assert_mobile_term_form_panel_is_usable(self):
+        "Check the mobile term form panel is visible with enough height to edit."
+        panel = self.page.locator("#read_pane_right.open-dict").first
+        panel.wait_for(state="visible")
+        box = panel.bounding_box()
+        viewport = self.page.viewport_size
+        assert box and viewport, "Panel and viewport should have dimensions"
+        assert box["y"] <= viewport["height"] * 0.46, "Panel opens high enough"
+        assert viewport["height"] - box["y"] >= viewport["height"] * 0.54, (
+            "Most of the form panel should be visible"
+        )
+
     def _refresh_browser(self):
         """
         Term actions (edits, hotkeys) cause updated content to be ajaxed in.
