@@ -559,15 +559,30 @@ class LuteTestClient:  # pylint: disable=too-many-public-methods
             el.click()
 
     def assert_mobile_term_form_panel_is_usable(self):
-        "Check the mobile term form panel is visible with enough height to edit."
+        "Check the mobile term form panel opens at the default transform."
         panel = self.page.locator("#read_pane_right.open-dict").first
         panel.wait_for(state="visible")
-        box = panel.bounding_box()
-        viewport = self.page.viewport_size
-        assert box and viewport, "Panel and viewport should have dimensions"
-        assert box["y"] <= viewport["height"] * 0.46, "Panel opens high enough"
-        assert viewport["height"] - box["y"] >= viewport["height"] * 0.54, (
-            "Most of the form panel should be visible"
+        classes = panel.get_attribute("class") or ""
+        assert "mobile-term-form-only" in classes, "Panel uses the mobile term form mode"
+        transform = panel.evaluate("(el) => el.style.transform")
+        assert transform == "translateY(60%)", (
+            "Mobile term form panel starts at translateY(60%)"
+        )
+
+    def save_mobile_term_form(self, updates=None):
+        "Fill and save the mobile term form."
+        updates = updates or {}
+        iframe = self.page.frame(name="wordframe")
+        self._fill_term_form(iframe, updates)
+        iframe.locator("#btnsubmit").first.click()
+
+    def assert_mobile_term_form_closes_after_saved_flash(self):
+        "Check the saved flash is shown, then the mobile term form closes."
+        iframe = self.page.frame(name="wordframe")
+        iframe.locator("#flash").first.wait_for(state="visible")
+        self.page.locator("#read_pane_right.open-dict").wait_for(
+            state="detached",
+            timeout=3000,
         )
 
     def _refresh_browser(self):

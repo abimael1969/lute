@@ -267,12 +267,15 @@
       btmMarginCont.classList.add("open-dict");
 
       const viewportHeight = document.documentElement.clientHeight;
-      const desiredTranslatePercent = Math.round(mouseY / viewportHeight * 100) + 10;
-      const maxTranslatePercent = 45;
-      const appliedTranslatePercent = Math.min(
+      let desiredTranslatePercent = Math.round(mouseY / viewportHeight * 100) + 10;
+      let maxTranslatePercent = 45;
+      let appliedTranslatePercent = Math.min(
         desiredTranslatePercent,
         maxTranslatePercent
       );
+      if (readPaneRight.classList.contains("mobile-term-form-only")) {
+        appliedTranslatePercent = 60;
+      }
       const dict_transform = `translateY(${appliedTranslatePercent}%)`;
       document.querySelector("#read_pane_right.open-dict").style.transform = dict_transform;
       readPaneRight.style.opacity = "1";
@@ -312,6 +315,15 @@
         re_marked.addClass('wordhover');
       });
     };
+
+    if (
+      event.data.event === "LuteTermFormSavedFlashFinished" &&
+      mediaTablet.matches &&
+      readPaneRight.classList.contains("mobile-term-form-only") &&
+      readPaneRight.classList.contains("open-dict")
+    ) {
+      closeRightPane();
+    }
   };
 
   $(document).ready(function () {

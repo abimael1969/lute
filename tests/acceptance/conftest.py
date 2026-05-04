@@ -496,6 +496,19 @@ def then_mobile_term_form_panel_is_usable(luteclient):
     luteclient.assert_mobile_term_form_panel_is_usable()
 
 
+@when(parsers.parse("I save the mobile term form:\n{content}"))
+def when_save_mobile_term_form(luteclient, content):
+    "The content is assumed to be yaml."
+    updates = yaml.safe_load(content)
+    luteclient.save_mobile_term_form(updates)
+
+
+@then("the mobile term form closes after the saved message")
+def then_mobile_term_form_closes_after_saved_message(luteclient):
+    "The mobile bottom sheet should close after the saved flash."
+    luteclient.assert_mobile_term_form_closes_after_saved_flash()
+
+
 @then("the bulk edit term form is shown")
 def then_reading_page_bulk_edit_term_form_is_shown(luteclient):
     "Check content."

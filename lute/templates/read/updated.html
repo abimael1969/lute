@@ -25,7 +25,9 @@
     <script>
       $(document).ready(function() {
         window.parent.postMessage({ event: "LuteTermFormPosted" }, "*");
-        $('#flash').delay(1000).fadeOut();
+        $('#flash').delay(1000).fadeOut(function() {
+          window.parent.postMessage({ event: "LuteTermFormSavedFlashFinished" }, "*");
+        });
       });
     </script>
 

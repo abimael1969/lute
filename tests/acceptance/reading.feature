@@ -40,6 +40,16 @@ Feature: User can actually read and stuff.
 
 
     @mobile
+    Scenario: Mobile term form closes after save message
+        Given a Spanish book "Hola" with content:
+            Hola. Adios amigo.
+        When I click "Hola"
+        And I save the mobile term form:
+            translation: Hello
+        Then the mobile term form closes after the saved message
+
+
+    @mobile
     Scenario: Mobile term form stays usable from the last visible line
         Given a Spanish book "Hola" with content:
             uno dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis diecisiete dieciocho diecinueve veinte.
