@@ -11,6 +11,8 @@
 body {
     --background-color: #fff;
     --font-color: #000;
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
     --status-0-color: #D5FFFF;
     --status-1-color: #F5B8A9;
@@ -1989,7 +1991,9 @@ input[name='status']:disabled + label {
         top: 0;
         width: 100%;
         background: var(--background-color);
-        height: 4rem; /* Matches the read_pane_left margin-top. */
+        height: calc(4rem + var(--safe-area-top)); /* Matches the read_pane_left margin-top. */
+        padding-top: var(--safe-area-top);
+        box-sizing: border-box;
         z-index: 1001;
         margin-bottom: 0.5rem;
     }
@@ -2000,7 +2004,7 @@ input[name='status']:disabled + label {
 
     #read_pane_left {
         width: unset !important;
-        margin-top: 4rem;
+        margin-top: calc(4rem + var(--safe-area-top));
     }
 
     .reading_header_container {
@@ -2027,8 +2031,21 @@ input[name='status']:disabled + label {
         bottom: 0;
         left: 0;
         opacity: 0;
+        padding-bottom: var(--safe-area-bottom);
         /* for touch drag resize to work */
         touch-action: none;
+    }
+
+    div#read_pane_right.mobile-term-form-only {
+        grid-template-rows: 1fr;
+    }
+
+    div#read_pane_right.mobile-term-form-only .wordframecontainer {
+        min-height: 0;
+    }
+
+    div#read_pane_right.mobile-term-form-only .dictcontainer {
+        display: none !important;
     }
 
     #read_pane_right::after {
@@ -2340,7 +2357,7 @@ div#termimagesearch span.imageAction:hover {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.75rem;
+    padding: 0.75rem 0.75rem calc(0.75rem + var(--safe-area-bottom));
     background: var(--background-color);
     border-top: 1px solid #8ec7ec;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
@@ -2397,7 +2414,7 @@ span.textitem.phrase-current {
 
 @media screen and (max-width: 640px) {
     .mobile-phrase-bar {
-        padding: 0.5rem;
+        padding: 0.5rem 0.5rem calc(0.5rem + var(--safe-area-bottom));
     }
     .phrase-bar-btn {
         padding: 0.45rem 0.65rem;

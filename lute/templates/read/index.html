@@ -212,6 +212,7 @@
   mediaTablet.addEventListener("change", function() {
     if (!mediaTablet.matches) {
       readPaneRight.style.removeProperty("transform");
+      readPaneRight.classList.remove("mobile-term-form-only");
     }
   })
 
@@ -251,7 +252,14 @@
     if (event.data.event === "LuteTermFormOpened") {
       LookupButton.TERM_FORM_CONTAINER = wordFrame.contentDocument.getElementById("term-form-container");
       inject_pending_term_reference_into_form(wordFrame.contentDocument);
-      loadDictionaries();
+      if (mediaTablet.matches) {
+        $(".dictcontainer").css('display', 'none');
+        readPaneRight.classList.add("mobile-term-form-only");
+      }
+      else {
+        readPaneRight.classList.remove("mobile-term-form-only");
+        loadDictionaries();
+      }
     }
 
     if (event.data.event === "LuteTermFormOpened" && mediaTablet.matches) {
@@ -259,14 +267,20 @@
       btmMarginCont.classList.add("open-dict");
 
       const viewportHeight = document.documentElement.clientHeight;
-      const mousePosPercent = mouseY / viewportHeight * 100;
-      const dict_transform = `translateY(${Math.round(mousePosPercent) + 10}%)`;
+      const desiredTranslatePercent = Math.round(mouseY / viewportHeight * 100) + 10;
+      const maxTranslatePercent = 45;
+      const appliedTranslatePercent = Math.min(
+        desiredTranslatePercent,
+        maxTranslatePercent
+      );
+      const dict_transform = `translateY(${appliedTranslatePercent}%)`;
       document.querySelector("#read_pane_right.open-dict").style.transform = dict_transform;
       readPaneRight.style.opacity = "1";
 
       // Add margin to the bottom of readLeft so it's fully scrollable
       // to the bottom when the dict is over text
-      const mt = `calc(${viewportHeight - mouseY + 70}px - var(--player-height))`;
+      const visiblePaneHeight = viewportHeight * (100 - appliedTranslatePercent) / 100;
+      const mt = `calc(${visiblePaneHeight + 70}px - var(--player-height))`;
       document.querySelector(".open-dict.btm-margin-container").style.marginTop = mt;
 
       // Sometimes there's an unnecessary text scroll when clicking on
@@ -522,6 +536,7 @@
 
   function closeRightPane() {
       readPaneRight.classList.remove("open-dict");
+      readPaneRight.classList.remove("mobile-term-form-only");
       btmMarginCont.classList.remove("open-dict");
       btmMarginCont.style.removeProperty("margin-top");
       readPaneRight.style.removeProperty("transform");

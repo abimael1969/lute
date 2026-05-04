@@ -242,6 +242,40 @@ def _add_base_routes(app, app_config):
         }
         return jsonify(ret)
 
+    @app.route("/manifest.webmanifest")
+    def web_app_manifest():
+        "PWA web app manifest."
+        response = make_response(
+            send_from_directory(
+                os.path.join(app.root_path, "static"),
+                "manifest.webmanifest",
+                mimetype="application/manifest+json",
+            )
+        )
+        response.headers["Cache-Control"] = "public, max-age=3600"
+        return response
+
+    @app.route("/service-worker.js")
+    def service_worker():
+        "Root-scoped service worker for the installable PWA shell."
+        response = make_response(
+            send_from_directory(
+                os.path.join(app.root_path, "static"),
+                "service-worker.js",
+                mimetype="application/javascript",
+            )
+        )
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        response.headers["Service-Worker-Allowed"] = "/"
+        return response
+
+    @app.route("/offline")
+    def offline():
+        "Simple offline fallback for the online-first PWA."
+        return render_template("offline.html")
+
     @app.route("/static/js/never_cache/<path:filename>")
     def custom_js(filename):
         """
@@ -380,6 +414,7 @@ def _init_parser_plugins(plugin_data_path, outfunc):
 
 
 mimetypes.add_type("text/css", ".css")
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 
 def create_app(

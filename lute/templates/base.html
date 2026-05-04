@@ -11,12 +11,18 @@
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}?v=2" type="image/x-icon"/>
   {% endif %}
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="application-name" content="Lute" />
+  <meta name="theme-color" content="#79b7e7" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon-57x57.png') }}" />
   <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='img/apple-touch-icon-72x72.png') }}" />
   <link rel="apple-touch-icon" sizes="114x114" href="{{ url_for('static', filename='img/apple-touch-icon-114x114.png') }}" />
   <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='img/apple-touch-startup.png') }}" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Lute" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/jquery/jquery-ui.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/tagify/tagify.css') }}" />
@@ -44,6 +50,7 @@
   <script type="text/javascript" src="/static/js/never_cache/lute-hotkey-utils.js" charset="utf-8"></script>
   <script type="text/javascript" src="/static/js/never_cache/lute.js" charset="utf-8"></script>
   <script type="text/javascript" src="/static/js/never_cache/lute-anki.js" charset="utf-8"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/pwa-register.js') }}" charset="utf-8" defer></script>
 
   <script type="text/javascript">
     const LUTE_USER_SETTINGS = {{ user_settings | safe }}
