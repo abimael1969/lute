@@ -10,3 +10,12 @@ BACKUP_PATH: /app/data/backups
 
 # Docker mode
 IS_DOCKER: true
+
+# AI term autofill can be configured with environment variables:
+# AI_AUTOFILL_ENABLED, AI_AUTOFILL_BASE_URL, AI_AUTOFILL_API_KEY,
+# AI_AUTOFILL_MODEL, AI_AUTOFILL_TARGET_LANG, AI_AUTOFILL_FILL_PARENTS.
+AI_AUTOFILL_ENABLED: false
+AI_AUTOFILL_BASE_URL: https://openrouter.ai/api/v1
+AI_AUTOFILL_MODEL: openrouter/free
+AI_AUTOFILL_TARGET_LANG: es
+AI_AUTOFILL_FILL_PARENTS: true

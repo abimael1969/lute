@@ -339,6 +339,7 @@ def handle_term_form(
         hide_pronunciation=hide_pronunciation,
         tags=repo.get_term_tags(),
         embedded_in_reading_frame=embedded_in_reading_frame,
+        ai_autofill_enabled=current_app.env_config.ai_autofill_enabled,
     )
 
 

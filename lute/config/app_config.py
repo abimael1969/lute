@@ -37,6 +37,30 @@ class AppConfig:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"ENV must be prod or dev, was {self.env}.")
 
         self.is_docker = bool(config.get("IS_DOCKER", False))
+        self.ai_autofill_enabled = self._bool_value(
+            os.environ.get(
+                "AI_AUTOFILL_ENABLED", config.get("AI_AUTOFILL_ENABLED", False)
+            )
+        )
+        self.ai_autofill_base_url = os.environ.get(
+            "AI_AUTOFILL_BASE_URL",
+            config.get("AI_AUTOFILL_BASE_URL", "https://openrouter.ai/api/v1"),
+        ).rstrip("/")
+        self.ai_autofill_api_key = os.environ.get(
+            "AI_AUTOFILL_API_KEY", config.get("AI_AUTOFILL_API_KEY", "")
+        )
+        self.ai_autofill_model = os.environ.get(
+            "AI_AUTOFILL_MODEL", config.get("AI_AUTOFILL_MODEL", "openrouter/free")
+        )
+        self.ai_autofill_target_lang = os.environ.get(
+            "AI_AUTOFILL_TARGET_LANG", config.get("AI_AUTOFILL_TARGET_LANG", "es")
+        )
+        self.ai_autofill_fill_parents = self._bool_value(
+            os.environ.get(
+                "AI_AUTOFILL_FILL_PARENTS",
+                config.get("AI_AUTOFILL_FILL_PARENTS", True),
+            )
+        )
 
         # Database name.
         self.dbname = config.get("DBNAME", None)
@@ -72,6 +96,12 @@ class AppConfig:  # pylint: disable=too-many-instance-attributes
         "Get user's appdata directory from platformdirs."
         dirs = PlatformDirs("Lute3", "Lute3")
         return dirs.user_data_dir
+
+    def _bool_value(self, value):
+        "Return bool for yaml/env style values."
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in ("1", "true", "yes", "y", "on")
 
     @property
     def sqliteconnstring(self):

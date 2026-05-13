@@ -73,6 +73,9 @@
              onclick="clicked_zoomable_image(this);"
              />
       </div>
+      {% if embedded_in_reading_frame %}
+      <div id="ai-autofill-status" aria-live="polite"></div>
+      {% endif %}
 
       <div id="status-container">
         {{ form.status(class="form-control") }}
@@ -145,6 +148,79 @@
       cb.removeAttr("disabled");
     else
       cb.attr("disabled", true);
+  };
+
+  let _plain_text_from_html = function(value) {
+    const div = document.createElement('div');
+    div.innerHTML = value ?? '';
+    return (div.textContent || div.innerText || '').replace(/\u200B/g, '').trim();
+  };
+
+  let _set_ai_autofill_status = function(message) {
+    const el = document.getElementById('ai-autofill-status');
+    if (el != null)
+      el.textContent = message;
+  };
+
+  let maybe_autofill_reader_term = function() {
+    const in_reading_frame = ("{{ embedded_in_reading_frame }}" == "True");
+    if (!in_reading_frame)
+      return;
+    const ai_autofill_enabled = ("{{ ai_autofill_enabled|lower }}" == "true");
+    if (!ai_autofill_enabled)
+      return;
+
+    const translation_el = document.getElementById('translation');
+    const parents_el = document.getElementById('parentslist');
+    if (translation_el == null || parents_el == null)
+      return;
+    if ((translation_el.value || '').trim() != '')
+      return;
+
+    const term_text = (document.getElementById('text')?.value || '').trim();
+    const lang_id = parseInt(document.getElementById('language_id')?.value || '0');
+    if (term_text == '' || lang_id == 0)
+      return;
+
+    _set_ai_autofill_status('Buscando sugerencia...');
+    $.ajax({
+      url: '/read/term_autofill',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        lang_id: lang_id,
+        term_text: term_text,
+        sentence_context: _plain_text_from_html($('input[name="lute_ref_sentence_html"]').val() || ''),
+        book_title: $('input[name="lute_ref_book_title"]').val() || ''
+      }),
+      success: function(data) {
+        let changed = false;
+        if ((translation_el.value || '').trim() == '' && (data.translation || '').trim() != '') {
+          translation_el.value = data.translation.trim();
+          changed = true;
+        }
+        if (
+          parents_tagify != null &&
+          get_parents().length == 0 &&
+          Array.isArray(data.parents) &&
+          data.parents.length == 1 &&
+          (data.parents[0] || '').trim() != ''
+        ) {
+          parents_tagify.addTags([data.parents[0].trim()], true, false);
+          changed = true;
+        }
+        if (changed) {
+          form_changed = true;
+          enable_disable_sync_status_checkbox();
+          _set_ai_autofill_status('Sugerencia lista');
+          return;
+        }
+        _set_ai_autofill_status(data.provider_error ? 'Sin sugerencia' : '');
+      },
+      error: function() {
+        _set_ai_autofill_status('Sin sugerencia');
+      }
+    });
   };
 
   var TAGS = {{ tags | safe }};
@@ -263,6 +339,7 @@
     window.parent.postMessage({ event: "LuteTermFormOpened" }, "*");
 
     enable_disable_sync_status_checkbox();
+    maybe_autofill_reader_term();
   });  // end $(document).ready
 
 

@@ -1391,6 +1391,12 @@ div.help-text {
     vertical-align: top /* removes annoying extra space below */
 }
 
+#ai-autofill-status {
+    color: #666;
+    font-size: 0.85rem;
+    min-height: 1rem;
+}
+
 #term {
     display: flex;
     flex-direction: column;

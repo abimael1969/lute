@@ -2,8 +2,17 @@
 /read endpoints.
 """
 
-from flask import Blueprint, flash, request, render_template, redirect, jsonify
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    request,
+    render_template,
+    redirect,
+    jsonify,
+)
 from lute.read.service import Service
+from lute.read.ai_autofill import TermAutofillClient
 from lute.read.forms import TextForm
 from lute.term.model import Repository
 from lute.term.routes import handle_term_form
@@ -200,6 +209,33 @@ def refresh_page(bookid, pagenum):
 def empty():
     "Show an empty/blank page."
     return ""
+
+
+@bp.route("/term_autofill", methods=["POST"])
+def term_autofill():
+    "Return AI suggestions for a reader term form."
+    data = request.json or {}
+    term_text = (data.get("term_text") or "").strip()
+    language_id = int(data.get("lang_id") or 0)
+    language = LanguageRepository(db.session).find(language_id)
+    if language is None:
+        return jsonify(
+            {
+                "translation": "",
+                "parents": [],
+                "confidence": "low",
+                "provider_error": "Language not found",
+            }
+        )
+
+    client = TermAutofillClient(current_app.env_config)
+    suggestion = client.suggest(
+        language.name,
+        term_text,
+        sentence_context=data.get("sentence_context") or "",
+        book_title=data.get("book_title") or "",
+    )
+    return jsonify(suggestion)
 
 
 @bp.route("/termform/<int:langid>/<text>", methods=["GET", "POST"])

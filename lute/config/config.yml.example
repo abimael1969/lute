@@ -21,3 +21,12 @@ DBNAME: lute.db
 
 # Set IS_DOCKER: true if this is run in a container.
 # IS_DOCKER: true
+
+# Optional AI autofill for reader term forms.
+# Uses OpenRouter's OpenAI-compatible API by default.
+# AI_AUTOFILL_ENABLED: false
+# AI_AUTOFILL_BASE_URL: https://openrouter.ai/api/v1
+# AI_AUTOFILL_API_KEY: your-openrouter-api-key
+# AI_AUTOFILL_MODEL: openrouter/free
+# AI_AUTOFILL_TARGET_LANG: es
+# AI_AUTOFILL_FILL_PARENTS: true
